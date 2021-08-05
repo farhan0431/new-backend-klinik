@@ -30,6 +30,8 @@ $router->group(['prefix' => 'api/'], function () use ($router) {
         $router->post('changepassword', 'AuthController@changePassword');
 
         $router->post('/register', 'UserController@store');
+
+        $router->get('/testing', 'LaporanController@testing');
     });
 
     $router->group([
@@ -62,35 +64,61 @@ $router->group(['prefix' => 'api/'], function () use ($router) {
         
 
         $router->group([
-            'prefix' => '/laporan'
+            'prefix' => '/janji'
         ], function() use ($router) {
-            $router->get('/', 'LaporanController@index');
-            $router->post('/', 'LaporanController@store');
-            $router->put('/', 'LaporanController@update');
-            $router->delete('/{id}', 'LaporanController@delete');
-            $router->post('/status', 'LaporanController@status');
-            $router->post('/asuransi', 'LaporanController@asuransi');
-            $router->get('/laporan-saya','LaporanController@laporanSaya');
-            $router->get('/informasi/{id}','LaporanController@informasiStatus');
-            $router->put('/nopol', 'LaporanController@updateNopol');
+            $router->get('/', 'JanjiController@index');
+            $router->post('/', 'JanjiController@store');
+            $router->put('/', 'JanjiController@update');
+            $router->delete('/{id}', 'JanjiController@delete');
+            $router->get('/active','JanjiController@activeJanji');
+            $router->post('/batal','JanjiController@batalJanji');
+            $router->post('/resep', 'JanjiController@resepSend');
+            $router->get('/resep', 'JanjiController@getResep');
+            $router->get('/berita', 'JanjiController@berita');
+
+            
+            
+        });
+
+        $router->group([
+            'prefix' => '/dokter'
+        ], function() use ($router) {
+            $router->get('/', 'DokterController@index');
+            $router->get('/get-janji','DokterController@getJanjiDokter');
+            $router->post('/', 'DokterController@store');
+            $router->put('/', 'DokterController@update');
+            $router->delete('/{id}', 'DokterController@delete');
+            $router->post('/kartu','DokterController@storeKartuBerobat');
+            $router->get('/kartu','DokterController@getKartu');
+
+
+            $router->get('/jadwal/{id}', 'DokterController@jadwal');
             
             
         });
 
 
         $router->group([
-            'prefix' => '/target'
+            'prefix' => '/identitas'
         ], function() use ($router) {
-            $router->get('/', 'TargetController@index');
-            $router->post('/', 'TargetController@store');
-            $router->delete('/{id}', 'TargetController@delete');
-            $router->put('/', 'TargetController@update');
-            $router->get('/simpad', 'TargetController@index_simpad');
-            $router->post('/simpad', 'TargetController@store_simpad');
-            $router->get('/bphtb', 'TargetController@index_bphtb');
-            $router->post('/bphtb', 'TargetController@store_bphtb');
-            $router->get('/pajak', 'TargetController@jenis_pajak');
+            $router->post('/update', 'IdentitasController@update');
         });
+
+
+        $router->group([
+            'prefix' => '/chat'
+        ], function() use ($router) {
+            $router->get('/','ChatController@index');
+            $router->post('/','ChatController@store');
+            $router->post('/dokter','ChatController@storeDokter');
+            $router->get('/get-chat','ChatController@getChat');
+            $router->Get('/get-chat-dokter','chatController@chatDokter');
+        });
+
+        
+
+
+       
 
         $router->group([
             'prefix' => '/user'
@@ -102,6 +130,9 @@ $router->group(['prefix' => 'api/'], function () use ($router) {
             $router->delete('/{id}', 'UserController@delete');
             $router->get('/roles','UserController@roles');
             $router->post('/upload', 'UserController@uploadPicture');
+            $router->post('/token','UserController@setToken');
+            $router->get('/notif','UserController@notif');
+            $router->post('/notif','UserController@readNotif');
 
         });
 
@@ -117,6 +148,17 @@ $router->group(['prefix' => 'api/'], function () use ($router) {
             $router->get('/kota/{id}','SettingsController@getKota');
         });
 
+
+
+        $router->group([
+            'prefix' => '/admin'
+        ], function() use ($router) {
+            $router->get('/', 'AdminController@index');
+            $router->get('/janji','AdminController@getJanji');
+            $router->get('/dokter','AdminController@getDokter');
+            $router->post('/upload','AdminController@uploadGambar');
+            $router->post('/dokter','AdminController@updateDokter');
+        });
     });
 
 });

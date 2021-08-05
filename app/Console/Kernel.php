@@ -14,6 +14,8 @@ class Kernel extends ConsoleKernel
      */
     protected $commands = [
         //
+        \Laravelista\LumenVendorPublish\VendorPublishCommand::class
+
     ];
 
     /**

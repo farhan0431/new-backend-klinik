@@ -8,6 +8,7 @@ require_once __DIR__.'/../vendor/autoload.php';
 
 date_default_timezone_set(env('APP_TIMEZONE', 'UTC'));
 
+
 /*
 |--------------------------------------------------------------------------
 | Create The Application
@@ -107,6 +108,8 @@ $app->register(Fruitcake\Cors\CorsServiceProvider::class);
 $app->register(\Barryvdh\DomPDF\ServiceProvider::class);
 $app->register(\Maatwebsite\Excel\ExcelServiceProvider::class);
 $app->register(Yajra\Oci8\Oci8ServiceProvider::class);
+$app->register(Berkayk\OneSignal\OneSignalServiceProvider::class);
+class_alias(Berkayk\OneSignal\OneSignalFacade::class, 'OneSignal');
 
 $app->configure('dompdf');
 
@@ -126,5 +129,8 @@ $app->router->group([
 ], function ($router) {
     require __DIR__.'/../routes/web.php';
 });
+
+app('translator')->setLocale('id');
+
 
 return $app;

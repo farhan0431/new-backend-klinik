@@ -15,6 +15,9 @@ use Illuminate\Auth\Passwords\CanResetPassword;
 use Illuminate\Contracts\Auth\CanResetPassword as CanResetPasswordContract;
 
 use App\Roles;
+use App\Identitas;
+use App\notifikasi;
+use App\Dokter;
 
 
 // class User extends Authenticatable implements JWTSubject
@@ -27,7 +30,7 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
     protected $guarded = [];
     protected $hidden = ['password', 'remember_token'];
     protected $dates = ['created_at'];
-    protected $appends = ['created_at_format', 'avatar_link'];
+    protected $appends = ['created_at_format', 'avatar_link', 'identitas','notifikasi','unred','data_dokter'];
 
     public function getAvatarLinkAttribute()
     {
@@ -36,6 +39,32 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
         }
         return url('user/default-avatar.jpg');
     }
+
+    public function getIdentitasAttribute()
+    {
+        return Identitas::where('id_pasien',$this->id)->get();
+    }
+
+    public function getNotifikasiAttribute()
+    {
+        return Notifikasi::where('id_user',$this->id)->orderBy('created_at',"DESC")->get();
+    }
+
+    public function getDataDokterAttribute()
+    {
+        $data = Dokter::where('id_user',$this->id);
+        if($data->count() == 0) {
+            return null;
+        } 
+        return $data->first();
+    }
+
+    public function getUnredAttribute()
+    {
+        return Notifikasi::where('id_user',$this->id)->where('status','1')->count();
+    }
+
+
 
     // Rest omitted for brevity
 
@@ -86,4 +115,9 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
 
         // return $roles[$this->role_id];
     }
+
+    // public function identitas()
+    // {
+    //     return $this->belongsTo(Identitas::class,'role_id','id_pasien');
+    // }
 }

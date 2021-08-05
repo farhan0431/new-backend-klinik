@@ -11,6 +11,7 @@ use TymonJWTAuth\ExceptionsToken\ExpiredException;
 use TymonJWTAuth\Exceptions\TokenInvalidException;
 use TymonJWTAuth\JWTAuth;
 use App\User;
+use Berkayk\OneSignal\OneSignalFacade as OneSignal;
 
 class AuthController extends Controller
 {
@@ -53,6 +54,14 @@ class AuthController extends Controller
      */
     public function me()
     {
+        // OneSignal::sendNotificationToUser(
+        //     "Some Message", 
+        //     $this->guard()->user()->token,
+        //     $url = null, 
+        //     $data = null, 
+        //     $buttons = null, 
+        //     $schedule = null
+        // );
         return response()->json(['data' => $this->guard()->user()]);
     }
 

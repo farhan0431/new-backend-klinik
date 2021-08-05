@@ -8,13 +8,15 @@ use App\User;
 use App\Roles;
 use Validator;
 use Hash;
+use App\Notifikasi;
+use App\Identitas;
 
 class UserController extends Controller
 {
     public function index()
     {
         $user = User::with('role_name')->orderBy('created_at', 'DESC')->when(request()->q, function($query) {
-            $query->where('name', 'LIKE', '%' . request()->q . '%');
+            $query->where('username', 'LIKE', '%' . request()->q . '%');
         });
         return response()->json([
             'status' => 'success', 
@@ -32,32 +34,66 @@ class UserController extends Controller
         ]);
     }
 
+    public function notif(Request $request)
+    {
+        $notif = Notifikasi::where('id_user',$request->user()->id);
+
+        $data = $notif->orderBy('created_at','DESC')->get();
+        $count = $notif->where('status','1')->count();
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $data,
+            'count' => $count
+        ]);
+    }
+
     public function store(Request $request)
     {
+        Identitas::unguard();
 
         if($request->adminCreated != 'yes'){
 
             $validate = Validator::make($request->all(), [
-                'name' => 'required|string',
+                // 'name' => 'required|string',
                 'username' => 'required|unique:users,username',
                 'email' => 'required|email|unique:users,email',
                 'password' => 'required|min:6',
-                'nik' => 'required',
+                // 'nik' => 'required',
                 'telpon' => 'required'
             ]);
     
             if ($validate->fails()) {
-                return response()->json($validate->errors(), 500);
+                return response()->json(['status' => 'error', 'data' => $validate->errors()], 500);
             }
     
             $user = User::create([
-                'name' => $request->name,
+                'name' => $request->username,
                 'username' => $request->username,
                 'email' => $request->email,
                 'password' => app('hash')->make($request->password),
-                'role_id' => $request->role_id,
-                'nik' => $request->nik,
+                'role_id' => 1,
+                // 'nik' => '1',
                 'telpon' => $request->telpon
+            ]);
+
+            Identitas::create([
+                'id_pasien' => $user->id,
+                'nama' => $request->username,
+                'alamat' => '-',
+                'umur' => 0,
+                'tanggal_lahir' => '2021-06-01',
+                // 'jk' => $request->jk,
+                'suku' => '-',
+                'telp' => $request->telpon,
+                'pekerjaan' => '-',
+                'keluhan_umum' => '-',
+                'tinggi_berat' => '-',
+                'goldar' => '-',
+                'riwayat_penyakit' => '-',
+                'alergi_obat' => '-',
+                'alergi_makanan' => '-',
+                'jk' => 1
             ]);
 
         }else{
@@ -79,11 +115,15 @@ class UserController extends Controller
                 'email' => $request->email,
                 'password' => app('hash')->make($request->password),
                 'role_id' => $request->role_id,
-                'nik' => "0",
+                // 'nik' => "0",
                 'telpon' => "0"
             ]);
 
         }
+
+        
+
+
         
 
 
@@ -111,23 +151,32 @@ class UserController extends Controller
         return response()->json(['status' => 'success', 'data' => $user]);
     }
 
+    public function setToken(Request $request)
+    {
+        $user = User::find($request->user()->id);
+        $user->update([
+            'token' => $request->token
+        ]);
+        return response()->json(['status' => 'success']);
+    }
+
     public function update(Request $request)
     {
         $this->validate($request, [
-            'name' => 'required|string',
-            'username' => 'required|string|unique:users,username,' . $request->id,
-            'email' => 'required|email|unique:users,email,' . $request->id,
+            // 'name' => 'required|string',
+            'username' => 'required|string|unique:users,username,' . $request->user()->id,
+            // 'email' => 'required|email|unique:users,email,' . $request->id,
             'password' => 'nullable|string|min:6',
             // 'role_id' => 'requ÷ired'
         ]);
 
-        $user = User::find($request->id);
+        $user = User::find($request->user()->id);
         $user->update([
-            'name' => $request->name,
+            // 'name' => $request->name,
             'username' => $request->username,
-            'email' => $request->email,
+            // 'email' => $request->email,
             'password' => $request->password != '' ? app('hash')->make($request->password):$user->password,
-            'role_id' => $request->type == 'edit' ? $request->user()->role_id : $request->role_id
+            // 'role_id' => $request->type == 'edit' ? $request->user()->role_id : $request->role_id
         ]);
         return response()->json(['status' => 'success']);
     }
@@ -244,4 +293,15 @@ class UserController extends Controller
     //     $captcha = \Captcha::create('flat', true);
     //     return response()->json(['status' => 'success', 'data' => $captcha]);
     // }
+
+    public function readNotif(Request $request) {
+        $notif = Notifikasi::where('id',$request->id)->first();
+
+        $notif->update([
+            'status' => 2
+        ]);
+        
+        return response()->json(['status' => 'success']);
+
+    }
 }
