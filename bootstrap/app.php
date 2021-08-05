@@ -107,9 +107,9 @@ $app->register(Tymon\JWTAuth\Providers\LumenServiceProvider::class);
 $app->register(Fruitcake\Cors\CorsServiceProvider::class);
 $app->register(\Barryvdh\DomPDF\ServiceProvider::class);
 $app->register(\Maatwebsite\Excel\ExcelServiceProvider::class);
-$app->register(Yajra\Oci8\Oci8ServiceProvider::class);
-$app->register(Berkayk\OneSignal\OneSignalServiceProvider::class);
-class_alias(Berkayk\OneSignal\OneSignalFacade::class, 'OneSignal');
+// $app->register(Yajra\Oci8\Oci8ServiceProvider::class);
+// $app->register(Berkayk\OneSignal\OneSignalServiceProvider::class);
+// class_alias(Berkayk\OneSignal\OneSignalFacade::class, 'OneSignal');
 
 $app->configure('dompdf');
 
