@@ -159,6 +159,8 @@ $router->group(['prefix' => 'api/'], function () use ($router) {
             $router->get('/dokter','AdminController@getDokter');
             $router->post('/upload','AdminController@uploadGambar');
             $router->post('/dokter','AdminController@updateDokter');
+            $router->put('/berita','AdminController@updateBerita');
+            $router->post('/upload-berita','AdminController@uploadGambarBerita');
         });
     });
 

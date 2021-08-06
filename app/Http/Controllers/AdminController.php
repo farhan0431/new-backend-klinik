@@ -17,6 +17,7 @@ use Carbon\Carbon;
 use Berkayk\OneSignal\OneSignalFacade as OneSignal;
 use App\Resep;
 use App\Chat;
+use App\Berita;
 
 
 
@@ -94,6 +95,26 @@ class AdminController extends Controller
 
     }
 
+    public function updateBerita(Request $request) {
+        $validate = Validator::make($request->all(), [
+            'title' => 'required',
+            'deskripsi' => 'required',
+            'id' => 'required'
+            
+        ]);
+
+        if ($validate->fails()) {
+            return response()->json($validate->errors(), 500);
+        }
+
+        Berita::find($request->id)->update([
+            'title' => $request->title,
+            'fee' => $request->fee
+        ]);
+
+        return response()->json(['status' => 'success'],200);
+    }
+
     public function getDokter()
     {
         $user = Dokter::with('data_user')->orderBy('created_at','DESC')->whereHas('data_user', function($query) {
@@ -114,6 +135,19 @@ class AdminController extends Controller
             $user->update(['thumb_avatar' => $filename]);
         }
         return response()->json(['status' => $user]);
+    }
+
+    public function uploadGambarBerita(Request $request)
+    {
+        $berita = Berita::find($request->id);
+        if($request->hasFile('file')) {
+            $file = $request->file('file');
+            $filename = rand(0,10000).'-'.$file->extension();
+            
+            move_uploaded_file($file, base_path('public/berita/' . $filename));
+            $berita->update(['img' => $filename]);
+        }
+        return response()->json(['status' => $berita]);
     }
     //
 }
