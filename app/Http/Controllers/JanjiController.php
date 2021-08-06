@@ -84,7 +84,7 @@ class JanjiController extends Controller
         $janji->update([
             'status' => 4
         ]);
-        return response()->json(['status' => 'success']);
+        return response()->json(['status' => 'success'],200);
     }
 
     public function resepSend(Request $request)
@@ -147,6 +147,15 @@ class JanjiController extends Controller
         $berita = Berita::take(5)->get();
         return $berita;
 
+    }
+
+    public function getBerita(Request $request)
+    {
+        $berita = Berita::orderBy('created_at','DESC')->when(request()->q, function($query) {
+            $query->where('title','LIKE','%'.request()->q.'%');
+        })
+        ->get();
+        return response()->json(['status' => 'success', 'data' => $berita]);
     }
 
 

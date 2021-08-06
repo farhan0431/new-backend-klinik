@@ -142,7 +142,7 @@ class UserController extends Controller
         //     'password' => app('hash')->make($request->password),
         //     'role_id' => $request->role_id
         // ]);
-        return response()->json(['status' => 'success','data' => $request->all()]);
+        return response()->json(['status' => 'success','data' => $request->all(),200]);
     }
 
     public function edit($id)

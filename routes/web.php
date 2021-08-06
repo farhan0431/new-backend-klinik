@@ -75,6 +75,7 @@ $router->group(['prefix' => 'api/'], function () use ($router) {
             $router->post('/resep', 'JanjiController@resepSend');
             $router->get('/resep', 'JanjiController@getResep');
             $router->get('/berita', 'JanjiController@berita');
+            $router->get('/data-berita','JanjiController@getBerita');
 
             
             
