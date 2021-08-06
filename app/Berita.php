@@ -11,7 +11,7 @@ class Berita extends Model
 
     protected $table = 'berita';
     protected $appends = [
-        'url'
+        'img'
     ];
     // protected $with = [
     //     'data_user'
@@ -20,7 +20,7 @@ class Berita extends Model
     // protected $appends = ['user_data'];
     protected $fillable = ['desc','title','url','file'];
 
-    public function getUrlAttribute()
+    public function getImgAttribute()
     {
             return url('berita/' . $this->file);
     }
