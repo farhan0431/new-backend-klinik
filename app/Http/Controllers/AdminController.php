@@ -160,15 +160,20 @@ class AdminController extends Controller
             return response()->json($validate->errors(), 500);
         }
 
-        $berita = Berita::create([
-            'title' => $request->title,
-            'deskripsi' => $request->deskripsi
-        ]);
-        if($berita) {
-            return response()->json(['status' => 'success','data' => $berita],200);
-        }else{
-            return response()->json(['status' => 'gagal'],500);
-        }
+        // $berita = Berita::create([
+        //     'title' => $request->title,
+        //     'deskripsi' => $request->deskripsi
+        // ]);
+        // if($berita) {
+        //     return response()->json(['status' => 'success','data' => $berita],200);
+        // }else{
+        //     return response()->json(['status' => 'gagal'],500);
+        // }
+        
+        return response()->json(['status' => 'gagal'],500);
+
+        {
+                
 
         
     }
