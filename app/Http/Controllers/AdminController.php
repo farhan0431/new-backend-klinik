@@ -153,9 +153,7 @@ class AdminController extends Controller
     public function storeBerita(Request $request) {
         $validate = Validator::make($request->all(), [
             'title' => 'required',
-            'deskripsi' => 'required',
-            'id' => 'required'
-            
+            'deskripsi' => 'required'            
         ]);
 
         if ($validate->fails()) {
