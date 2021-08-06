@@ -154,7 +154,7 @@ class JanjiController extends Controller
         $berita = Berita::orderBy('created_at','DESC')->when(request()->q, function($query) {
             $query->where('title','LIKE','%'.request()->q.'%');
         })
-        ->get();
+        ->paginate(10);
         return response()->json(['status' => 'success', 'data' => $berita]);
     }
 
