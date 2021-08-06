@@ -11,18 +11,18 @@ class Berita extends Model
 
     protected $table = 'berita';
     protected $appends = [
-        'gambar_link'
+        'url'
     ];
     // protected $with = [
     //     'data_user'
     // ];
 
     // protected $appends = ['user_data'];
-    protected $fillable = ['desc','title','url','img'];
+    protected $fillable = ['desc','title','url','file'];
 
-    public function getGambarLinkAttribute()
+    public function getUrlAttribute()
     {
-            return url('berita/' . $this->img);
+            return url('berita/' . $this->file);
     }
 
 
