@@ -22,10 +22,7 @@ class Berita extends Model
 
     public function getGambarLinkAttribute()
     {
-        if ($this->thumb_avatar) {
-            return url('profile/' . $this->thumb_avatar);
-        }
-        return url('user/default-avatar.jpg');
+            return url('berita/' . $this->img);
     }
 
 
