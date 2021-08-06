@@ -149,5 +149,25 @@ class AdminController extends Controller
         }
         return response()->json(['status' => 'success'],200);
     }
+
+    public function storeBerita(Request $request) {
+        $validate = Validator::make($request->all(), [
+            'title' => 'required',
+            'deskripsi' => 'required',
+            'id' => 'required'
+            
+        ]);
+
+        if ($validate->fails()) {
+            return response()->json($validate->errors(), 500);
+        }
+
+        $berita = Berita::create([
+            'title' => $request->title,
+            'fee' => $request->fee
+        ]);
+
+        return response()->json(['status' => 'success','data' => $berita],200);
+    }
     //
 }
