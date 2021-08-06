@@ -10,18 +10,23 @@ class Berita extends Model
 {
 
     protected $table = 'berita';
-    // protected $appends = [
-    //     // 'jadwal',
-    //     // 'status_teks',
-    //     // 'jenis_kecelakaan_teks',
-    //     // 'gambar_link'
-    // ];
+    protected $appends = [
+        'gambar_link'
+    ];
     // protected $with = [
     //     'data_user'
     // ];
 
     // protected $appends = ['user_data'];
     protected $fillable = ['desc','title','url'];
+
+    public function getGambarLinkAttribute()
+    {
+        if ($this->thumb_avatar) {
+            return url('profile/' . $this->thumb_avatar);
+        }
+        return url('user/default-avatar.jpg');
+    }
 
 
 

@@ -147,7 +147,7 @@ class AdminController extends Controller
             move_uploaded_file($file, base_path('public/berita/' . $filename));
             $berita->update(['img' => $filename]);
         }
-        return response()->json(['status' => $berita]);
+        return response()->json(['status' => 'success'],200);
     }
     //
 }
