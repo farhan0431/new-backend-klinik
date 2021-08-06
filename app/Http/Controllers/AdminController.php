@@ -162,10 +162,15 @@ class AdminController extends Controller
 
         $berita = Berita::create([
             'title' => $request->title,
-            'fee' => $request->fee
+            'deskripsi' => $request->deskripsi
         ]);
+        if($berita) {
+            return response()->json(['status' => 'success','data' => $berita],200);
+        }else{
+            return response()->json(['status' => 'gagal'],500);
+        }
 
-        return response()->json(['status' => 'success','data' => $berita],200);
+        
     }
     //
 }
