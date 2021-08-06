@@ -18,7 +18,7 @@ class Berita extends Model
     // ];
 
     // protected $appends = ['user_data'];
-    protected $fillable = ['desc','title','url','file'];
+    protected $fillable = ['desc','title','url','file','deskripsi'];
 
     public function getImgAttribute()
     {
