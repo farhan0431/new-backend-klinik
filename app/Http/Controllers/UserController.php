@@ -10,6 +10,8 @@ use Validator;
 use Hash;
 use App\Notifikasi;
 use App\Identitas;
+use App\Dokter;
+
 
 class UserController extends Controller
 {
@@ -77,24 +79,42 @@ class UserController extends Controller
                 'telpon' => $request->telpon
             ]);
 
-            Identitas::create([
-                'id_pasien' => $user->id,
-                'nama' => $request->username,
-                'alamat' => '-',
-                'umur' => 0,
-                'tanggal_lahir' => '2021-06-01',
-                // 'jk' => $request->jk,
-                'suku' => '-',
-                'telp' => $request->telpon,
-                'pekerjaan' => '-',
-                'keluhan_umum' => '-',
-                'tinggi_berat' => '-',
-                'goldar' => '-',
-                'riwayat_penyakit' => '-',
-                'alergi_obat' => '-',
-                'alergi_makanan' => '-',
-                'jk' => 1
-            ]);
+
+            if($request->role_id == 3) {
+
+                Dokter::create([
+                    'id_user' => $user->id,
+                    'nama' => $request->nama,
+                    'fee' => '0',
+                    'jabatan' => '-',
+                    'foto' => null,
+                    'pengalaman' => 1
+                ]);
+               
+            }else{
+
+                Identitas::create([
+                    'id_pasien' => $user->id,
+                    'nama' => $request->username,
+                    'alamat' => '-',
+                    'umur' => 0,
+                    'tanggal_lahir' => '2021-06-01',
+                    // 'jk' => $request->jk,
+                    'suku' => '-',
+                    'telp' => $request->telpon,
+                    'pekerjaan' => '-',
+                    'keluhan_umum' => '-',
+                    'tinggi_berat' => '-',
+                    'goldar' => '-',
+                    'riwayat_penyakit' => '-',
+                    'alergi_obat' => '-',
+                    'alergi_makanan' => '-',
+                    'jk' => 1
+                ]);
+
+            }
+
+            
 
         }else{
 
