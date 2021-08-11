@@ -12,7 +12,6 @@ use App\Notifikasi;
 use App\Identitas;
 use App\Dokter;
 
-
 class UserController extends Controller
 {
     public function index()
@@ -79,42 +78,26 @@ class UserController extends Controller
                 'telpon' => $request->telpon
             ]);
 
-
-            if($request->role_id == 3) {
-
-                Dokter::create([
-                    'id_user' => $user->id,
-                    'nama' => $request->nama,
-                    'fee' => '0',
-                    'jabatan' => '-',
-                    'foto' => null,
-                    'pengalaman' => 1
-                ]);
-               
-            }else{
-
-                Identitas::create([
-                    'id_pasien' => $user->id,
-                    'nama' => $request->username,
-                    'alamat' => '-',
-                    'umur' => 0,
-                    'tanggal_lahir' => '2021-06-01',
-                    // 'jk' => $request->jk,
-                    'suku' => '-',
-                    'telp' => $request->telpon,
-                    'pekerjaan' => '-',
-                    'keluhan_umum' => '-',
-                    'tinggi_berat' => '-',
-                    'goldar' => '-',
-                    'riwayat_penyakit' => '-',
-                    'alergi_obat' => '-',
-                    'alergi_makanan' => '-',
-                    'jk' => 1
-                ]);
-
-            }
-
             
+
+            Identitas::create([
+                'id_pasien' => $user->id,
+                'nama' => $request->username,
+                'alamat' => '-',
+                'umur' => 0,
+                'tanggal_lahir' => '2021-06-01',
+                // 'jk' => $request->jk,
+                'suku' => '-',
+                'telp' => $request->telpon,
+                'pekerjaan' => '-',
+                'keluhan_umum' => '-',
+                'tinggi_berat' => '-',
+                'goldar' => '-',
+                'riwayat_penyakit' => '-',
+                'alergi_obat' => '-',
+                'alergi_makanan' => '-',
+                'jk' => 1
+            ]);
 
         }else{
 
@@ -128,16 +111,30 @@ class UserController extends Controller
             if ($validate->fails()) {
                 return response()->json($validate->errors(), 500);
             }
+
+            if($request->role_id == 3) {
+                Dokter::create([
+                    'id_user' => $user->id,
+                    'nama' => $request->nama,
+                    'fee' => '0',
+                    'jabatan' => '-',
+                    'foto' => null,
+                    'pengalaman' => 1
+                ]);
+               
+            }else{
+                $user = User::create([
+                    'name' => $request->name,
+                    'username' => $request->username,
+                    'email' => $request->email,
+                    'password' => app('hash')->make($request->password),
+                    'role_id' => $request->role_id,
+                    // 'nik' => "0",
+                    'telpon' => "0"
+                ]);
+            }
     
-            $user = User::create([
-                'name' => $request->name,
-                'username' => $request->username,
-                'email' => $request->email,
-                'password' => app('hash')->make($request->password),
-                'role_id' => $request->role_id,
-                // 'nik' => "0",
-                'telpon' => "0"
-            ]);
+           
 
         }
 
