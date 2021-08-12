@@ -111,27 +111,47 @@ class UserController extends Controller
             if ($validate->fails()) {
                 return response()->json($validate->errors(), 500);
             }
+            $user = User::create([
+                'name' => $request->name,
+                'username' => $request->username,
+                'email' => $request->email,
+                'password' => app('hash')->make($request->password),
+                'role_id' => $request->role_id,
+                // 'nik' => "0",
+                'telpon' => "0"
+            ]);
 
             if($request->role_id == 3) {
                 Dokter::create([
                     'id_user' => $user->id,
-                    'nama' => $request->nama,
+                    'nama' => $request->name,
                     'fee' => '0',
                     'jabatan' => '-',
-                    'foto' => null,
+                    'foto' => '',
                     'pengalaman' => 1
                 ]);
                
             }else{
-                $user = User::create([
-                    'name' => $request->name,
-                    'username' => $request->username,
-                    'email' => $request->email,
-                    'password' => app('hash')->make($request->password),
-                    'role_id' => $request->role_id,
-                    // 'nik' => "0",
-                    'telpon' => "0"
+               
+                Identitas::create([
+                    'id_pasien' => $user->id,
+                    'nama' => $request->username,
+                    'alamat' => '-',
+                    'umur' => 0,
+                    'tanggal_lahir' => '2021-06-01',
+                    // 'jk' => $request->jk,
+                    'suku' => '-',
+                    'telp' => $request->telpon,
+                    'pekerjaan' => '-',
+                    'keluhan_umum' => '-',
+                    'tinggi_berat' => '-',
+                    'goldar' => '-',
+                    'riwayat_penyakit' => '-',
+                    'alergi_obat' => '-',
+                    'alergi_makanan' => '-',
+                    'jk' => 1
                 ]);
+
             }
     
            
