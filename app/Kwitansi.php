@@ -5,10 +5,13 @@ namespace App;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Settings extends Model
+class Kwitansi extends Model
 {
 
-    protected $table = 'settings';
+    protected $table = 'kwitansi';
+    protected $fillable = ['id_kartu'];
+
+
 
 
 }

@@ -5,25 +5,22 @@ namespace App;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class JadwalDokter extends Model
+class BuktiTransfer extends Model
 {
 
-    protected $table = 'jadwal_dokter';
-    // protected $appends = [
-    //     'tipe_identitas',
-    //     'status_teks',
-    //     'jenis_kecelakaan_teks',
-    //     'gambar_link'
-    // ];
-    protected $fillable = ['id_dokter','tanggal','status'];
+    protected $table = 'bukti_transfer';
+    protected $appends = [
+        'gambar_link'
+    ];
+    protected $fillable = ['nama','id_kartu','file'];
 
 
 
-    // public function getGambarLinkAttribute()
-    // {
+    public function getGambarLinkAttribute()
+    {
 
-    //     return url('uploads/' . $this->foto);
-    // }
+        return url('bukti-transfer/' . $this->file);
+    }
 
     // public function getTipeIdentitasAttribute()
     // {

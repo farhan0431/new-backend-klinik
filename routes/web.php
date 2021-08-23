@@ -76,6 +76,13 @@ $router->group(['prefix' => 'api/'], function () use ($router) {
             $router->get('/resep', 'JanjiController@getResep');
             $router->get('/berita', 'JanjiController@berita');
             $router->get('/data-berita','JanjiController@getBerita');
+            $router->post('/bukti-transfer','JanjiController@storeBuktiTransfer');
+            $router->get('/invoice','JanjiController@invoicePdf');
+            $router->get('/kwitansi','JanjiController@kwitansiPdf');
+
+            $router->post('/penilaian','JanjiController@storePenilaian');
+
+
 
             
             
@@ -91,9 +98,14 @@ $router->group(['prefix' => 'api/'], function () use ($router) {
             $router->delete('/{id}', 'DokterController@delete');
             $router->post('/kartu','DokterController@storeKartuBerobat');
             $router->get('/kartu','DokterController@getKartu');
+            $router->get('/toggle-work','DokterController@toggleWork');
 
 
             $router->get('/jadwal/{id}', 'DokterController@jadwal');
+            
+            $router->get('/tanggal', 'DokterController@getJadwalDokter');
+            $router->post('/tanggal','DokterController@setJadwalDokter');
+            $router->get('/identitas', 'DokterController@identitasPasien');
             
             
         });

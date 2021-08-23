@@ -15,8 +15,13 @@ use App\Notifikasi;
 use App\Resep;
 use App\Berita;
 use App\Slider;
+use App\BuktiTransfer;
 // namespace App\Events;
+use App\KartuBerobat;
 
+use Barryvdh\DomPDF\Facade as PDF;
+use Illuminate\Support\Facades\File;
+use App\Penilaian;
 // use App\Events\SendNotif;
 
 use Carbon\Carbon;
@@ -60,7 +65,8 @@ class JanjiController extends Controller
 
     public function activeJanji(Request $request)
     {
-        $janji =  Janji::with('data_dokter')->where('id_pasien',$request->user()->id)->where('status',0)->orWhere('status',1)->orWhere('status',2)->first();
+        $janji =  Janji::with('data_dokter')->where('id_pasien',$request->user()->id)->where('status',0)->orWhere('status',1)->orWhere('status',2)->orderBy('created_at','DESC')->first();
+
         return response()->json(['status' => 'success', 'data' => $janji,'berita' => $this->berita(),'slider' => $this->sliderImage()]);
 
     }
@@ -158,6 +164,36 @@ class JanjiController extends Controller
         return response()->json(['status' => 'success', 'data' => $berita]);
     }
 
+    public function storeBuktiTransfer(Request $request)
+    {
+
+        $validate = Validator::make($request->all(), [
+            'file' => 'required',
+            'id_kartu' => 'required'
+        ]);
+
+        $filename = '';
+
+        if ($request->hasFile('file')) {
+            $file = $request->file('file');
+            $filename = rand(0,100).'-'.$request->id_kartu.'-bukti-transfer.'.$file->extension();
+            
+            move_uploaded_file($file, base_path('public/bukti-transfer/' . $filename));
+        }
+
+        $data = BuktiTransfer::create([
+            'nama' => $request->nama,
+            'file' => $filename,
+            'id_kartu' => $request->id_kartu
+        ]);
+
+        return response()->json(['status' => 'success','data' => $data],200);
+
+
+
+
+    }
+
 
 
     public function store(Request $request)
@@ -167,64 +203,70 @@ class JanjiController extends Controller
             'id_pasien' => 'required',
             'id_dokter' => 'required',
             'tanggal_janji' => 'required',
-            'jam_janji' => 'required'
+            // 'jam_janji' => 'required'
         ]);
 
         if ($validate->fails()) {
             return response()->json($validate->errors(), 500);
         }
         
-        $cekAntrian = Janji::whereDate('created_at',Carbon::today())->orderBy('nomor_antrian','DESC')->first();
+        $queryAntrian = Janji::whereDate('created_at',Carbon::today())->where('id_dokter',$request->id_dokter)->where('status','!=','4')->orderBy('nomor_antrian','DESC');
 
-        $store = Janji::create([
-            'id_pasien' => $request->id_pasien,
-            'id_dokter' => $request->id_dokter,
-            'tanggal_janji' => $request->tanggal_janji,
-            'jam_janji' => $request->jam_janji,
-            'nomor_antrian' => $cekAntrian != null ?$cekAntrian->nomor_antrian + 1 : 1,
-            'status' => 0
-        ]);
-
-        $dokter = Dokter::where('id',$request->id_dokter)->first();
-
-        $user = User::where('id',$dokter->id_user)->first();
-
-        // OneSignal::sendNotificationToUser(
-        //     "Pasien telah membuat janji dengan anda!", 
-        //     $user->token,
-        //     $url = null, 
-        //     // $data = $dataSend, 
-        //     $buttons = null, 
-        //     $schedule = null
-        // );
-
-        $this->sendMessage('Dokter Ku App',"Pasien telah membuat janji dengan anda!",$user->token);
-
-        // 1 : Data Janji Dokter | 2: Page Kartu Berobat | 3: Chat
-
-        Notifikasi::create([
-            'id_user' => $dokter->id_user,
-            'status' => 1,
-            'title' => 'Pasien telah membuat janji dengan anda!',
-            'desc' => 'Klik disini untuk melihat data.',
-            'tambahan' => $store->id,
-            'page' => 1
-        ]);
+        $cekAntrian = $queryAntrian->first();
 
 
-        
-
-
+        if($queryAntrian->count() < 5) {
+            $store = Janji::create([
+                'id_pasien' => $request->id_pasien,
+                'id_dokter' => $request->id_dokter,
+                'tanggal_janji' => $request->tanggal_janji,
+                'jam_janji' => null,
+                'nomor_antrian' => $cekAntrian != null ?$cekAntrian->nomor_antrian + 1 : 1,
+                'status' => 0
+            ]);
+    
+            $dokter = Dokter::where('id',$request->id_dokter)->first();
+    
+            $user = User::where('id',$dokter->id_user)->first();
+    
+            // OneSignal::sendNotificationToUser(
+            //     "Pasien telah membuat janji dengan anda!", 
+            //     $user->token,
+            //     $url = null, 
+            //     // $data = $dataSend, 
+            //     $buttons = null, 
+            //     $schedule = null
+            // );
+    
+            $this->sendMessage('Dokter Ku App',"Pasien telah membuat janji dengan anda!",$user->token);
+    
+            // 1 : Data Janji Dokter | 2: Page Kartu Berobat | 3: Chat
+    
+            Notifikasi::create([
+                'id_user' => $dokter->id_user,
+                'status' => 1,
+                'title' => 'Pasien telah membuat janji dengan anda!',
+                'desc' => 'Klik disini untuk melihat data.',
+                'tambahan' => $store->id,
+                'page' => 1
+            ]);
+    
+    
+            
+    
+    
+            
         
     
-
-        return response()->json([
-            // 'data' => $upload,
-            'status' => 'success',
-            'data' => $store,
-            // 'antrian' => $cekAntrian->nomor_antrian + 1,
-            
-        ],200);
+            return response()->json([
+                // 'data' => $upload,
+                'status' => 'success',
+                'data' => $store,
+                // 'antrian' => $cekAntrian->nomor_antrian + 1,
+                
+            ],200);
+        }
+        
 
     }
 
@@ -423,5 +465,91 @@ class JanjiController extends Controller
         curl_close($ch);
         
         return $response;
+    }
+
+    public function invoicePdf(Request $request) {
+
+        $path = base_path('public/invoice/');
+        $setting = Settings::first();
+
+        $kartuBerobat = KartuBerobat::with('resep')->find($request->id);
+
+        $pembayaran = $kartuBerobat->bukti_transfer != null ? 'Transfer' : 'Tunai';
+
+        $tanggal = Carbon::parse($kartuBerobat->created_at)->format('Y-m-d');
+        $pdf = PDF::loadView('reports.invoice', compact('kartuBerobat','pembayaran' ,'setting','tanggal'))->setPaper('legal', 'landscape');
+        
+
+        $filename = 'invoice-'.rand(0,100).'-'.$request->id.'.pdf';
+
+
+
+        $pdf->save($path.$filename);
+
+        return response()->json([
+            'status' => 'success',
+            'data' => url('invoice/'.$filename),
+            // 'tanggal' => $tanggal,
+            // 'kartu' => $kartuBerobat
+        ]);
+
+
+    }
+
+     public function kwitansiPDf(Request $request) {
+
+        $path = base_path('public/kwitansi/');
+        $setting = Settings::first();
+
+        $kartuBerobat = KartuBerobat::with('resep')->find($request->id);
+        $pembayaran = $kartuBerobat->bukti_transfer != null ? 'Transfer' : 'Tunai';
+
+        $tanggal = Carbon::parse($kartuBerobat->created_at)->format('Y-m-d');
+        $pdf = PDF::loadView('reports.kwitansi', compact('kartuBerobat','pembayaran', 'setting','tanggal'))->setPaper('legal', 'landscape');
+
+        $filename = 'kwitansi-'.rand(0,100).'-'.$request->id.'.pdf';
+
+
+
+        $pdf->save($path.$filename);
+
+        return response()->json([
+            'status' => 'success',
+            'data' => url('kwitansi/'.$filename),
+            // 'tanggal' => $tanggal,
+            // 'kartu' => $kartuBerobat
+        ]);
+
+
+    }
+
+    public function storePenilaian(Request $request) {
+        $validate = Validator::make($request->all(), [
+            'id_dokter' => 'required',
+            'id_janji' => 'required',
+            'penilaian' => 'required',
+            'catatan' => 'required'
+        ]);
+
+        if ($validate->fails()) {
+            return response()->json($validate->errors(), 500);
+        }
+
+        $penilaian = Penilaian::create([
+            'id_dokter' => $request->id_dokter,
+            'id_janji' => $request->id_janji,
+            'penilaian' => $request->penilaian,
+            'catatan' => $request->catatan
+        ]);
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $penilaian,
+            // 'tanggal' => $tanggal,
+            // 'kartu' => $kartuBerobat
+        ]);
+
+
+
     }
 }

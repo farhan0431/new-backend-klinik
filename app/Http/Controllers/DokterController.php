@@ -16,6 +16,7 @@ use App\Janji;
 use Carbon\Carbon;
 use Berkayk\OneSignal\OneSignalFacade as OneSignal;
 use App\Resep;
+use App\Penilaian;
 
 
 
@@ -36,7 +37,7 @@ class DokterController extends Controller
         
 
 
-        $dokter = Dokter::orderBy('nama','DESC')->when(request()->q, function($query) {
+        $dokter = Dokter::with('data_user')->orderBy('nama','DESC')->when(request()->q, function($query) {
             $query->where('nama','LIKE','%'.request()->q.'%');
         })
         ->get();
@@ -61,33 +62,49 @@ class DokterController extends Controller
 
         $tanggal = [];
 
-        for($i = 1; $i <= 3;$i++)
-        {
-            $date = Carbon::now()->addDays($i);
+        // for($i = 1; $i <= 3;$i++)
+        // {
+        //     $date = Carbon::now()->addDays($i);
 
-            $full = [
-                'full_date' => $date->format('Y-m-d'),
-                'hari' => $date->format('D'),
-                'tanggal' => $date->format('d'),
-                'bulan' => $date->format('M')
-            ];
+        //     $full = [
+        //         'full_date' => $date->format('Y-m-d'),
+        //         'hari' => $date->format('D'),
+        //         'tanggal' => $date->format('d'),
+        //         'bulan' => $date->format('M')
+        //     ];
 
 
-            array_push($tanggal,$full);
-        }
+        //     array_push($tanggal,$full);
+        // }
         
 
-        $jadwal =  JadwalDokter::where('id_dokter',$id)->get();
-        return response()->json(['status' => 'success', 'data' => $jadwal, 'tanggal' => $tanggal]);
+        $date = Carbon::now();
+
+        $jadwal =  JadwalDokter::where('id_dokter',$id)->whereDate('tanggal','>=',$date)->orderBy('tanggal','asc')->limit('3')->get();
+
+        $penilaian = Penilaian::where('id_dokter',$id)->orderBy('created_at','desc')->limit('3')->get();
+
+
+        return response()->json(['status' => 'success', 'tanggal' => $jadwal,'review' => $penilaian,'id' => $id],200);
     }
 
     public function getKartu(Request $request)
     {
-        $data = KartuBerobat::with('resep')->find($request->id);
-        return response()->json([
-            'data' => $data,
-            'status' => 'success'
-        ],200);
+        if($request->type == 'janji')
+        {
+            $data = KartuBerobat::with('resep')->where('id_janji',$request->id)->first();
+            return response()->json([
+                'data' => $data,
+                'status' => 'success'
+            ],200);
+        }else{
+            $data = KartuBerobat::with('resep')->find($request->id);
+            return response()->json([
+                'data' => $data,
+                'status' => 'success'
+            ],200);
+        }
+       
     }
 
     public function storeKartuBerobat(Request $request)
@@ -119,6 +136,15 @@ class DokterController extends Controller
 
         $no_kartu = $no_kartu != null ? $no_kartu->no_kartu + 1 : 1;
 
+        $filename = '';
+
+        if ($request->hasFile('file')) {
+            $file = $request->file('file');
+            $filename = rand(0,100).'-dokumen-tambahan.'.$file->extension();
+            
+            move_uploaded_file($file, base_path('public/dokumen/' . $filename));
+
+        }
     
 
 
@@ -136,7 +162,8 @@ class DokterController extends Controller
             'perawatan' => $request->perawatan,
             'biaya' => $request->biaya,
             'catatan' => $request->catatan,
-            'id_dokter' => $request->user()->id
+            'id_dokter' => $request->user()->data_dokter->id,
+            'file' => $filename
         ]);
 
         // 1 : Data Janji Dokter | 2: Page Kartu Berobat | 3: Chat
@@ -245,5 +272,74 @@ class DokterController extends Controller
         
         return $response;
     }
+
+    public function toggleWork(Request $request)
+    {
+
+        $user = $request->user();
+
+        $dokter = Dokter::where('id_user',$user->id);
+
+        // if($dokter->work == 1){
+        //     $dokter->update(['work' => 0]);
+        // }else{
+        //     $dokter->update(['work' => 1]);
+        // }
+
+        $update = $dokter->first()->work == 1 ? $dokter->update(['work' => 0]) : $dokter->update(['work' => 1]);
+
+        return response()->json(['status'=>'sucess','data' => $dokter->first()->work]);
+
+    }
+
+
+    public function getJadwalDokter(Request $request)
+    {
+
+        $date = new Carbon('first day of this month');
+        $id = $request->user()->data_dokter->id;
+        $end =  Carbon::now()->endOfMonth();
+
+        $jadwal = JadwalDokter::where('id_dokter',$id)->whereBetween('tanggal',[$date,$end])->get();
+
+        $data = [];
+
+        foreach ($jadwal as $row) {
+            array_push($data,$row['tanggal']);
+        }
+
+
+        return response()->json(['status'=>'success','data'=>$data]);
+
+    }
+
+
+    public function setJadwaLDokter(Request $request)
+    {
+        $date = new Carbon('first day of this month');
+        $id = $request->user()->data_dokter->id;
+        $end =  Carbon::now()->endOfMonth();
+
+        $jadwal = JadwalDokter::where('id_dokter',$id)->whereBetween('tanggal',[$date,$end])->delete();
+
+        foreach ($request->tanggal as $row) {
+            JadwalDokter::create([
+                'id_dokter' => $id,
+                'tanggal' => $row,
+                'status' => 0
+            ]);
+        }
+
+
+        return response()->json(['status' => 'sucess'],200);
+    }
+
+    public function identitasPasien(Request $request)
+    {
+        $data = Identitas::where('id_pasien',$request->id)->first();
+
+        return response()->json(['status'=>'success','data'=>$data],200);
+    }
+
     //
 }

@@ -8,6 +8,8 @@ use App\User;
 use App\Dokter;
 use App\Identitas;
 use App\Janji;
+use App\BuktiTransfer;
+use App\Penilaian;
 
 class KartuBerobat extends Model
 {
@@ -21,7 +23,10 @@ class KartuBerobat extends Model
         'identitas',
         // 'user_data',
         'dokter',
-        'janji'
+        'janji',
+        'dokumen_link',
+        'bukti_transfer',
+        'penilaian'
     ];
     // protected $fillable = ['id_dokter','jam'];
 
@@ -41,15 +46,34 @@ class KartuBerobat extends Model
         return Dokter::where('id',$this->id_dokter)->first();
     }
 
+    public function getPenilaianAttribute()
+    {
+        return Penilaian::where('id_janji',$this->id_janji)->first();
+    }
+
+    public function getBuktiTransferAttribute()
+    {
+        return BuktiTransfer::where('id_kartu',$this->id)->first();
+    }
+
     public function getJanjiAttribute()
     {
-        return Janji::where('nomor_antrian',$this->nomor_antrian)->first();
+        return Janji::where('id',$this->id_janji)->first();
+    }
+
+    public function getDokumenLinkAttribute()
+    {
+        if ($this->file) {
+            return url('dokumen/' . $this->file);
+        }
+        return 'none';
     }
 
     public function resep()
     {
         return $this->belongsTo(Resep::class,'id_janji','id_janji');
     }
+
 
 
     // public function getGambarLinkAttribute()

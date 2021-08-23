@@ -201,17 +201,17 @@ class UserController extends Controller
     {
         $this->validate($request, [
             // 'name' => 'required|string',
-            'username' => 'required|string|unique:users,username,' . $request->user()->id,
-            // 'email' => 'required|email|unique:users,email,' . $request->id,
+            'username' => 'required|string|unique:users,username,' . $request->id,
+            'email' => 'required|email|unique:users,email,' . $request->id,
             'password' => 'nullable|string|min:6',
             // 'role_id' => 'requ÷ired'
         ]);
 
-        $user = User::find($request->user()->id);
+        $user = User::find($request->id);
         $user->update([
             // 'name' => $request->name,
             'username' => $request->username,
-            // 'email' => $request->email,
+            'email' => $request->email,
             'password' => $request->password != '' ? app('hash')->make($request->password):$user->password,
             // 'role_id' => $request->type == 'edit' ? $request->user()->role_id : $request->role_id
         ]);
