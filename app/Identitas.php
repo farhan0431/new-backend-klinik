@@ -4,19 +4,22 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\User;
 
 class Identitas extends Model
 {
 
     protected $table = 'identitas';
-    // protected $appends = [
-    //     'tipe_identitas',
-    //     'status_teks',
-    //     'jenis_kecelakaan_teks',
-    //     'gambar_link'
-    // ];
+    protected $appends = [
+        'user_data',
+    ];
     // protected $fillable = ['id_dokter','jam'];
 
+
+    public function getUserDataAttribute()
+    {
+        return User::find($this->id_pasien)->username;
+    }
 
 
     // public function getGambarLinkAttribute()

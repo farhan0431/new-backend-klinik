@@ -41,7 +41,7 @@ class JanjiController extends Controller
     public function index(Request $request)
     {
 
-        $janji = Janji::with('data_dokter','resep','kartu_berobat')->where('id_pasien',$request->user()->id)->where('status',3)->orWhere('status',4)->orderBy('created_at','DESC')->get();
+        $janji = Janji::with('data_dokter','resep','kartu_berobat')->where('id_pasien',$request->user()->id)->where('status','>',2)->orderBy('created_at','DESC')->get();
 
 
         
@@ -65,7 +65,7 @@ class JanjiController extends Controller
 
     public function activeJanji(Request $request)
     {
-        $janji =  Janji::with('data_dokter')->where('id_pasien',$request->user()->id)->where('status',0)->orWhere('status',1)->orWhere('status',2)->orderBy('created_at','DESC')->first();
+        $janji =  Janji::with('data_dokter')->where('id_pasien',$request->user()->id)->where('status','<',3)->orderBy('created_at','DESC')->first();
 
         return response()->json(['status' => 'success', 'data' => $janji,'berita' => $this->berita(),'slider' => $this->sliderImage()]);
 

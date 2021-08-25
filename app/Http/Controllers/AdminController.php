@@ -124,6 +124,15 @@ class AdminController extends Controller
         return response()->json(['status' => 'success','data' => $user],200);
     }
 
+    public function getPasien()
+    {
+        $user = Identitas::orderBy('created_at','DESC')->when(request()->q, function($query) {
+            $query->where('nama', 'LIKE', '%' . request()->q . '%');
+        })->paginate(10);
+        return response()->json(['status' => 'success','data' => $user],200);
+    }
+
+
     public function uploadGambar(Request $request)
     {
         $user = User::find($request->id);
@@ -176,6 +185,58 @@ class AdminController extends Controller
                 
 
         
+    }
+
+    public function getHarian(Request $request)
+    {
+        $date = $request->date == '' ? Carbon::today() : $request->date;
+
+        if($request->type == 0) {
+
+            $janji =  $laporan = Janji::with('data_dokter','kartu_berobat')->whereDate('tanggal_janji', $date)->where('status',3)->orderBy('tanggal_janji','DESC');
+
+
+            $jumlahPemasukan = 0;
+
+            $jumlahJanji = $janji->count();
+
+
+            foreach ($janji->get() as $row) {
+                $jumlahPemasukan += $row->kartu_berobat->biaya;
+            }
+
+
+
+            return response()->json(['status' => 'success','data' => $janji->get(),'jumlah_pemasukan' => $jumlahPemasukan, 'jumlah_janji' => $jumlahJanji, 'date' => $date],200);
+
+        }else{
+
+            $month = Carbon::parse($date)->format('m');
+            $year = Carbon::parse($date)->format('Y');
+
+            $janji =  $laporan = Janji::with('data_dokter','kartu_berobat')->whereMonth('created_at', $month)->whereYear('tanggal_janji',$year)->where('status',3)->orderBy('tanggal_janji','DESC');
+
+
+            $jumlahPemasukan = 0;
+    
+            $jumlahJanji = $janji->count();
+    
+    
+            foreach ($janji->get() as $row) {
+                $jumlahPemasukan += $row->kartu_berobat->biaya;
+            }
+    
+    
+    
+            return response()->json(['status' => 'success','data' => $janji->get(),'jumlah_pemasukan' => $jumlahPemasukan, 'jumlah_janji' => $jumlahJanji, 'date' => $year],200);
+
+        }
+
+       
+
+
+
+
     }
     //
 }
