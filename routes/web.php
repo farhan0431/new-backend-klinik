@@ -176,6 +176,7 @@ $router->group(['prefix' => 'api/'], function () use ($router) {
             $router->post('/berita','AdminController@storeBerita');
             $router->get('/harian','AdminController@getHarian');
             $router->get('/pasien','AdminController@getPasien');
+            $router->get('/pdf','AdminController@exportPdf');
         });
     });
 

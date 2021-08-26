@@ -19,6 +19,9 @@ use App\Resep;
 use App\Chat;
 use App\Berita;
 
+use Barryvdh\DomPDF\Facade as PDF;
+use Illuminate\Support\Facades\File;
+
 
 
 class AdminController extends Controller
@@ -232,11 +235,93 @@ class AdminController extends Controller
 
         }
 
-       
-
-
-
+        
 
     }
+    public function exportPdf(Request $request) {
+
+        $path = base_path('public/laporan/');
+        $setting = Settings::first();
+
+
+
+        $date = $request->date == '' ? Carbon::today()->format('Y-m-d') : Carbon::parse($request->date)->format('Y-m-d');
+
+        // return response()->json(['status' => 'success'],200);
+
+    
+        if($request->type == 0) {
+            $jenis = 0;
+
+             $janji =  $laporan = Janji::with('data_dokter','kartu_berobat')->whereDate('tanggal_janji', $date)->where('status',3)->orderBy('tanggal_janji','DESC');
+
+             $tanggal = $date;
+
+
+            $jumlahPemasukan = 0;
+
+            $jumlahJanji = $janji->count();
+
+            $dataJanji = $janji->get();
+
+
+            foreach ($janji->get() as $row) {
+                $jumlahPemasukan += $row->kartu_berobat->biaya;
+            }
+
+            $pdf = PDF::loadView('reports.laporan', compact('dataJanji','tanggal', 'setting','jumlahPemasukan','jenis'))->setPaper('legal', 'landscape');
+
+            $filename = 'Laporan-Harian-'.$tanggal.'-nomor-'.rand(0,100).$request->id.'.pdf';
+
+            $pdf->save($path.$filename);
+
+
+
+
+
+            return response()->json(['status' => 'success','data' => url('laporan/'.$filename),'janji' => $dataJanji],200);
+
+
+            // return response()->json(['status' => 'success'],200);
+
+        }
+        else{
+            $jenis = 1;
+
+            $month = Carbon::parse($date)->format('m');
+            $year = Carbon::parse($date)->format('Y');
+
+            $janji =  $laporan = Janji::with('data_dokter','kartu_berobat')->whereMonth('created_at', $month)->whereYear('tanggal_janji',$year)->where('status',3)->orderBy('tanggal_janji','DESC');
+
+
+            $tanggal = 'Bulan '.$month.' Tahun '.$year;
+
+
+            $jumlahPemasukan = 0;
+
+            $jumlahJanji = $janji->count();
+
+            $dataJanji = $janji->get();
+
+
+            foreach ($janji->get() as $row) {
+                $jumlahPemasukan += $row->kartu_berobat->biaya;
+            }
+
+            $pdf = PDF::loadView('reports.laporan', compact('dataJanji','tanggal', 'setting','jumlahPemasukan','jenis'))->setPaper('legal', 'landscape');
+
+            $filename = 'Laporan-'.'Bulan-'.$month.'-Tahun-'.$year.'-nomor-'.rand(0,100).$request->id.'.pdf';
+
+            $pdf->save($path.$filename);
+
+
+
+
+
+            return response()->json(['status' => 'success','data' => url('laporan/'.$filename),'tanggal' => 'Bulan '.$month.' Tahun '.$year],200);
+        }
+        
+    }
+
     //
 }
