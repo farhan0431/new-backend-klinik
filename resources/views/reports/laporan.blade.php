@@ -220,10 +220,11 @@
         <h2>Easy Dent</h2>
             <p>{{ $setting->rumah_sakit }}</p>
             <p>{{ $setting->alamat }}</p>
-            <p>LAPORAN PEMASUKAN</p>
+            <p>LAPORAN PEMERIKSAAN</p>
             @if($jenis == 0)         
                 <p><small class="center-teks">Tanggal {{ $tanggal }}</small></p>
-            @else <p><small class="center-teks">{{ $tanggal }}</small></p>     
+            @elseif($jenis == 1) <p><small class="center-teks">{{ $tanggal }}</small></p>     
+            @elseif($jenis == 2) <p><small class="center-teks">{{ $dokter->nama }}</small></p>     
             @endif
         </div>
         <div class="img-logo">
@@ -237,7 +238,7 @@
                 <tr>
                     <th style="width:5%" >No</th>
                     <th style="width:10%">Tanggal</th>
-                    <th style="width:20%">Nama Dokter</th>
+                    <th style="width:20%">Nama Pasien</th>
                     <th style="width:50%" >Keterangan</th>
                     <th style="width:15%"class="right-teks">Biaya</th>
                 </tr>
@@ -247,8 +248,8 @@
                 <tr>
                     <td class="center-teks">1</td>
                     <td>{{ $row->tanggal_janji }}</td>
-                    <td>{{ $row->data_dokter->nama }}</td>
-                    <td>Perawatan umum</td>
+                    <td>{{ $row->data_pasien->name }}</td>
+                    <td>Diagnosa : {{ $row->kartu_berobat->diagnosa }}, Tindakan : {{$row->kartu_berobat->perawatan}}</td>
                     <td class="right-teks">Rp. {{ number_format($row->kartu_berobat->biaya) }}</td>
                 </tr>
                 @endforeach

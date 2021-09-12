@@ -32,6 +32,8 @@ $router->group(['prefix' => 'api/'], function () use ($router) {
         $router->post('/register', 'UserController@store');
 
         $router->get('/testing', 'LaporanController@testing');
+        $router->get('/excel','AdminController@exportExcel');
+
     });
 
     $router->group([
@@ -168,6 +170,8 @@ $router->group(['prefix' => 'api/'], function () use ($router) {
         ], function() use ($router) {
             $router->get('/', 'AdminController@index');
             $router->get('/janji','AdminController@getJanji');
+            $router->get('/konfirmasi','AdminController@getKonfirmasi');
+            $router->post('/konfirmasi','AdminController@konfirmasi');
             $router->get('/dokter','AdminController@getDokter');
             $router->post('/upload','AdminController@uploadGambar');
             $router->post('/dokter','AdminController@updateDokter');
@@ -177,6 +181,8 @@ $router->group(['prefix' => 'api/'], function () use ($router) {
             $router->get('/harian','AdminController@getHarian');
             $router->get('/pasien','AdminController@getPasien');
             $router->get('/pdf','AdminController@exportPdf');
+            $router->get('/excel','AdminController@exportExcel');
+            $router->get('/riwayat','AdminController@getRiwayat');
         });
     });
 

@@ -12,6 +12,7 @@ class Identitas extends Model
     protected $table = 'identitas';
     protected $appends = [
         'user_data',
+        'avatar_link'
     ];
     // protected $fillable = ['id_dokter','jam'];
 
@@ -20,6 +21,15 @@ class Identitas extends Model
     {
         return User::find($this->id_pasien)->username;
     }
+
+    public function getAvatarLinkAttribute()
+    {
+        if ($this->thumb_avatar) {
+            return url('profile/' . User::find($this->id_pasien)->username);
+        }
+        return url('user/default-avatar.jpg');
+    }
+
 
 
     // public function getGambarLinkAttribute()

@@ -18,7 +18,7 @@ class Janji extends Model
         // 'gambar_link'
         'status_teks'
     ];
-    protected $fillable = ['id_pasien','id_dokter','tanggal_janji','jam_janji','status','nomor_antrian'];
+    protected $fillable = ['id_pasien','id_dokter','tanggal_janji','jam_janji','status','nomor_antrian','konfirmasi'];
 
     
     public function data_pasien()

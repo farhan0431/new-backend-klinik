@@ -22,6 +22,10 @@ use App\Berita;
 use Barryvdh\DomPDF\Facade as PDF;
 use Illuminate\Support\Facades\File;
 
+use App\Exports\UsersExport;
+use Maatwebsite\Excel\Facades\Excel;
+use Maatwebsite\Excel\Facedes\WithHeadings;
+
 
 
 class AdminController extends Controller
@@ -67,6 +71,53 @@ class AdminController extends Controller
         })
         ->paginate(10);
         return response()->json(['status' => 'success','data' => $janji],200);
+
+    }
+
+    public function getKonfirmasi()
+    {
+        $date = Carbon::today()->addDay(1);
+
+        $janji =  Janji::with('data_dokter','data_identitas','data_pasien','resep','kartu_berobat')->orderBy('created_at','DESC')->where('tanggal_janji',$date)->where('konfirmasi',0)
+        ->paginate(10);
+        return response()->json(['status' => 'success','data' => $janji],200);
+
+    }
+
+    public function getRiwayat(Request $request)
+    {
+
+        $janji = Janji::with('data_dokter','data_identitas','data_pasien','resep','kartu_berobat')->where('id_pasien',$request->id)->where('status',3)->orderBy('tanggal_janji','ASC')->get();
+
+        return response()->json(['status' => 'success','data' => $janji],200);
+
+
+    }
+
+    public function konfirmasi(Request $request)
+    {
+
+        if($request->type == 2) {
+
+            Janji::find($request->id)->update([
+                'tanggal_janji' => $request->date
+            ]);
+
+        }else if($request->type == 3){
+
+            Janji::find($request->id)->update([
+                'konfirmasi' => $request->type,
+                'status' => 4
+            ]);
+
+        }else{
+            Janji::find($request->id)->update([
+                'konfirmasi' => $request->type,
+            ]);
+
+        }
+        
+        return response()->json(['status' => 'success'],200);
 
     }
 
@@ -127,12 +178,38 @@ class AdminController extends Controller
         return response()->json(['status' => 'success','data' => $user],200);
     }
 
-    public function getPasien()
+    public function getPasien(Request $request)
     {
-        $user = Identitas::orderBy('created_at','DESC')->when(request()->q, function($query) {
+
+        
+
+
+        $dataByName = Identitas::orderBy('created_at','DESC')->when(request()->q, function($query) {
             $query->where('nama', 'LIKE', '%' . request()->q . '%');
-        })->paginate(10);
-        return response()->json(['status' => 'success','data' => $user],200);
+        });
+
+        
+
+        if($dataByName->count() > 0) {
+            $data = $dataByName->paginate(10);
+            return response()->json(['status' => 'success','data' => $data],200);
+
+        }else{
+            $query = $request->q;
+            $id = ltrim(explode("_",$query)[0],"0");
+            
+            $data = Identitas::where('id', 'LIKE', '%' . $id . '%')->paginate(10);
+            
+
+            return response()->json(['status' => 'success','data' => $data],200);
+
+
+        }
+
+
+        // $user = Identitas::orderBy('created_at','DESC')->when(request()->q, function($query) {
+        //     $query->where('nama', 'LIKE', '%' . request()->q . '%');
+        // })->paginate(10);
     }
 
 
@@ -196,7 +273,7 @@ class AdminController extends Controller
 
         if($request->type == 0) {
 
-            $janji =  $laporan = Janji::with('data_dokter','kartu_berobat')->whereDate('tanggal_janji', $date)->where('status',3)->orderBy('tanggal_janji','DESC');
+            $janji =  $laporan = Janji::with('data_dokter','data_pasien','kartu_berobat')->whereDate('tanggal_janji', $date)->where('status',3)->orderBy('tanggal_janji','DESC');
 
 
             $jumlahPemasukan = 0;
@@ -212,12 +289,12 @@ class AdminController extends Controller
 
             return response()->json(['status' => 'success','data' => $janji->get(),'jumlah_pemasukan' => $jumlahPemasukan, 'jumlah_janji' => $jumlahJanji, 'date' => $date],200);
 
-        }else{
+        }else if($request->type == 1){
 
             $month = Carbon::parse($date)->format('m');
             $year = Carbon::parse($date)->format('Y');
 
-            $janji =  $laporan = Janji::with('data_dokter','kartu_berobat')->whereMonth('created_at', $month)->whereYear('tanggal_janji',$year)->where('status',3)->orderBy('tanggal_janji','DESC');
+            $janji =  $laporan = Janji::with('data_dokter','data_pasien','kartu_berobat')->whereMonth('created_at', $month)->whereYear('tanggal_janji',$year)->where('status',3)->orderBy('tanggal_janji','DESC');
 
 
             $jumlahPemasukan = 0;
@@ -232,6 +309,26 @@ class AdminController extends Controller
     
     
             return response()->json(['status' => 'success','data' => $janji->get(),'jumlah_pemasukan' => $jumlahPemasukan, 'jumlah_janji' => $jumlahJanji, 'date' => $year],200);
+
+        }else if($request->type == 2){
+
+            $month = Carbon::parse($date)->format('m');
+            $year = Carbon::parse($date)->format('Y');
+
+            $janji =  Janji::with('data_pasien','kartu_berobat')->whereMonth('created_at', $month)->whereYear('tanggal_janji',$year)->where('status',3)->where('id_dokter',$request->id_dokter)->orderBy('tanggal_janji','DESC');
+
+            $jumlahPemasukan = 0;
+    
+            $jumlahJanji = $janji->count();
+    
+    
+            foreach ($janji->get() as $row) {
+                $jumlahPemasukan += $row->kartu_berobat->biaya;
+            }
+    
+    
+    
+            return response()->json(['status' => 'success','data' => $janji->get(),'jumlah_pemasukan' => $jumlahPemasukan, 'jumlah_janji' => $jumlahJanji, 'date' => $year, 'dokter' => $request->id_dokter],200);
 
         }
 
@@ -253,7 +350,7 @@ class AdminController extends Controller
         if($request->type == 0) {
             $jenis = 0;
 
-             $janji =  $laporan = Janji::with('data_dokter','kartu_berobat')->whereDate('tanggal_janji', $date)->where('status',3)->orderBy('tanggal_janji','DESC');
+             $janji =  $laporan = Janji::with('data_dokter','data_pasien','kartu_berobat')->whereDate('tanggal_janji', $date)->where('status',3)->orderBy('tanggal_janji','DESC');
 
              $tanggal = $date;
 
@@ -285,7 +382,7 @@ class AdminController extends Controller
             // return response()->json(['status' => 'success'],200);
 
         }
-        else{
+        else if($request->type == 1){
             $jenis = 1;
 
             $month = Carbon::parse($date)->format('m');
@@ -320,8 +417,154 @@ class AdminController extends Controller
 
             return response()->json(['status' => 'success','data' => url('laporan/'.$filename),'tanggal' => 'Bulan '.$month.' Tahun '.$year],200);
         }
+        else if($request->type == 2){
+            $jenis = 2;
+
+            $month = Carbon::parse($date)->format('m');
+            $year = Carbon::parse($date)->format('Y');
+
+            $janji =  Janji::with('data_pasien','kartu_berobat')->whereMonth('created_at', $month)->whereYear('tanggal_janji',$year)->where('status',3)->where('id_dokter',$request->id_dokter)->orderBy('tanggal_janji','DESC');
+
+            $dokter = Dokter::find($request->id_dokter);
+
+            $tanggal = 'Bulan '.$month.' Tahun '.$year;
+
+
+            $jumlahPemasukan = 0;
+
+            $jumlahJanji = $janji->count();
+
+            $dataJanji = $janji->get();
+
+
+            foreach ($janji->get() as $row) {
+                $jumlahPemasukan += $row->kartu_berobat->biaya;
+            }
+
+            $pdf = PDF::loadView('reports.laporan', compact('dataJanji','tanggal', 'setting','jumlahPemasukan','jenis','dokter'))->setPaper('legal', 'landscape');
+
+            $filename = 'Laporan-'.'Bulan-'.$month.'-Tahun-'.$year.'-nomor-'.rand(0,100).$request->id.'.pdf';
+
+            $pdf->save($path.$filename);
+
+
+
+
+
+            return response()->json(['status' => 'success','data' => url('laporan/'.$filename),'tanggal' => 'Bulan '.$month.' Tahun '.$year,'dokter' => $dokter],200);
+        }
+
+        
         
     }
+
+    public function exportExcel(Request $request) {
+
+        $setting = Settings::first();
+
+
+
+        $date = $request->date == '' ? Carbon::today()->format('Y-m-d') : Carbon::parse($request->date)->format('Y-m-d');
+
+        // return response()->json(['status' => 'success'],200);
+
+    
+        if($request->type == 0) {
+            $jenis = 0;
+
+             $janji = Janji::with('data_dokter','data_pasien','kartu_berobat')->whereDate('tanggal_janji', $date)->where('status',3)->orderBy('tanggal_janji','DESC');
+
+             $tanggal = $date;
+
+
+            $jumlahPemasukan = 0;
+
+            $jumlahJanji = $janji->count();
+
+            $dataJanji = $janji->get();
+
+
+            foreach ($janji->get() as $row) {
+                $jumlahPemasukan += $row->kartu_berobat->biaya;
+            }
+
+            $filename = 'Laporan-Harian-'.$tanggal.'-nomor-'.rand(0,100).$request->id.'.xlsx';
+
+
+            return Excel::download(new UsersExport($dataJanji,$jumlahJanji,$tanggal,$setting,$jumlahPemasukan,$jenis,'2'),$filename);
+
+
+
+
+
+
+            // return response()->json(['status' => 'success','data' => url('laporan/'.$filename),'janji' => $dataJanji],200);
+
+
+            // return response()->json(['status' => 'success'],200);
+
+        }
+        else if($request->type == 1){
+            $jenis = 1;
+
+            $month = Carbon::parse($date)->format('m');
+            $year = Carbon::parse($date)->format('Y');
+
+            $janji =  $laporan = Janji::with('data_dokter','data_pasien','kartu_berobat')->whereMonth('created_at', $month)->whereYear('tanggal_janji',$year)->where('status',3)->orderBy('tanggal_janji','DESC');
+
+
+            $tanggal = 'Bulan '.$month.' Tahun '.$year;
+
+
+            $jumlahPemasukan = 0;
+
+            $jumlahJanji = $janji->count();
+
+            $dataJanji = $janji->get();
+
+
+            foreach ($janji->get() as $row) {
+                $jumlahPemasukan += $row->kartu_berobat->biaya;
+            }
+
+            $filename = 'Laporan-'.'Bulan-'.$month.'-Tahun-'.$year.'-nomor-'.rand(0,100).$request->id.'.xlsx';
+
+            return Excel::download(new UsersExport($dataJanji,$jumlahJanji,$tanggal,$setting,$jumlahPemasukan,$jenis,'2'),$filename);
+        }
+        else if($request->type == 2){
+            $jenis = 2;
+
+            $month = Carbon::parse($date)->format('m');
+            $year = Carbon::parse($date)->format('Y');
+
+            $janji =  Janji::with('data_pasien','data_dokter','kartu_berobat')->whereMonth('created_at', $month)->whereYear('tanggal_janji',$year)->where('status',3)->where('id_dokter',$request->id_dokter)->orderBy('tanggal_janji','DESC');
+
+            $dokter = Dokter::find($request->id_dokter);
+
+            $tanggal = 'Bulan '.$month.' Tahun '.$year;
+
+
+            $jumlahPemasukan = 0;
+
+            $jumlahJanji = $janji->count();
+
+            $dataJanji = $janji->get();
+
+
+            foreach ($janji->get() as $row) {
+                $jumlahPemasukan += $row->kartu_berobat->biaya;
+            }
+
+            $filename = 'Laporan-'.'Bulan-'.$month.'-Tahun-'.$year.'-nomor-'.rand(0,100).$request->id.'.xlsx';
+
+            return Excel::download(new UsersExport($dataJanji,$jumlahJanji,$tanggal,$setting,$jumlahPemasukan,$jenis,$dokter),$filename);
+        }
+
+        
+        
+    }
+    
+    
 
     //
 }

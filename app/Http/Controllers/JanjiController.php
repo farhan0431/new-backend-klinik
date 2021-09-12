@@ -265,6 +265,14 @@ class JanjiController extends Controller
                 // 'antrian' => $cekAntrian->nomor_antrian + 1,
                 
             ],200);
+        }else{
+            return response()->json([
+                // 'data' => $upload,
+                'status' => 'penuh',
+                'total_antrian' => $queryAntrian->count()
+                // 'antrian' => $cekAntrian->nomor_antrian + 1,
+                
+            ],200);
         }
         
 
