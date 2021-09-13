@@ -134,7 +134,7 @@ class IdentitasController extends Controller
             'alamat' => $request->alamat,
             'umur' => $request->umur,
             'tanggal_lahir' => $request->tanggal_lahir,
-            // 'jk' => $request->jk,
+            'jk' => $request->jk,
             'suku' => $request->suku,
             'telp' => $request->telp,
             'pekerjaan' => $request->pekerjaan,
