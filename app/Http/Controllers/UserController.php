@@ -58,10 +58,11 @@ class UserController extends Controller
             $validate = Validator::make($request->all(), [
                 // 'name' => 'required|string',
                 'username' => 'required|unique:users,username',
-                'email' => 'required|email|unique:users,email',
+                // 'email' => 'required|email|unique:users,email',
                 'password' => 'required|min:6',
                 // 'nik' => 'required',
-                'telpon' => 'required'
+                'telpon' => 'required',
+                'ibu' => 'required'
             ]);
     
             if ($validate->fails()) {
@@ -71,7 +72,7 @@ class UserController extends Controller
             $user = User::create([
                 'name' => $request->username,
                 'username' => $request->username,
-                'email' => $request->email,
+                'email' => $request->username.rand(0,100).'@mail.com',
                 'password' => app('hash')->make($request->password),
                 'role_id' => 1,
                 // 'nik' => '1',
@@ -85,7 +86,7 @@ class UserController extends Controller
                 'nama' => $request->username,
                 'alamat' => '-',
                 'umur' => 0,
-                'tanggal_lahir' => '2021-06-01',
+                'tanggal_lahir' => '2000-10-10',
                 // 'jk' => $request->jk,
                 'suku' => '-',
                 'telp' => $request->telpon,
@@ -96,7 +97,8 @@ class UserController extends Controller
                 'riwayat_penyakit' => '-',
                 'alergi_obat' => '-',
                 'alergi_makanan' => '-',
-                'jk' => 1
+                'jk' => 1,
+                'ibu' => $request->ibu
             ]);
 
         }else{

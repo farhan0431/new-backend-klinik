@@ -41,7 +41,7 @@ class UsersExport implements WithStyles,WithProperties,WithEvents
 
     public function __construct($data,$count,$tanggal,$setting,$jumlah,$jenis,$dokter) {
         $this->data = $data;
-        $this->count = $count+3;
+        $this->count = $count+4;
         $this->tanggal = $tanggal;
         $this->setting = $setting;
         $this->jumlah = $jumlah;
@@ -189,12 +189,12 @@ class UsersExport implements WithStyles,WithProperties,WithEvents
                 $event->sheet->mergeCells('P3:Q3');
                 $event->sheet->setCellValue('P3','Biaya');
 
-                $event->sheet->mergeCells('K8:O8');
-                $event->sheet->setCellValue('K8','Total :');
-                $event->sheet->getStyle('8')->applyFromArray($headingStyle);
+                $event->sheet->mergeCells('K'.$this->count.':O'.$this->count);
+                $event->sheet->setCellValue('K'.$this->count,'Total :');
+                $event->sheet->getStyle($this->count+1)->applyFromArray($headingStyle);
 
-                $event->sheet->mergeCells('P8:Q8');
-                $event->sheet->setCellValue('P8','Rp. '.number_format($this->jumlah));
+                $event->sheet->mergeCells('P'.$this->count.':Q'.$this->count);
+                $event->sheet->setCellValue('P'.$this->count,'Rp. '.number_format($this->jumlah));
 
 
                 

@@ -170,6 +170,7 @@ $router->group(['prefix' => 'api/'], function () use ($router) {
         ], function() use ($router) {
             $router->get('/', 'AdminController@index');
             $router->get('/janji','AdminController@getJanji');
+            $router->get('/antrian','AdminController@getAntrian');
             $router->get('/konfirmasi','AdminController@getKonfirmasi');
             $router->post('/konfirmasi','AdminController@konfirmasi');
             $router->get('/dokter','AdminController@getDokter');

@@ -74,12 +74,23 @@ class AdminController extends Controller
 
     }
 
+    public function getAntrian(Request $request)
+    {
+        $tanggal = $request->date == '' ? Carbon::today() : $request->date;
+
+
+        $janji =  $laporan = Janji::with('data_dokter','data_identitas','data_pasien','resep','kartu_berobat')->where('tanggal_janji',$tanggal)->where('status','<',2)->orderBy('created_at','DESC')
+        ->paginate(10);
+        return response()->json(['status' => 'success','data' => $janji,'tanggal' => $request->date],200);
+
+    }
+
     public function getKonfirmasi()
     {
         $date = Carbon::today()->addDay(1);
 
-        $janji =  Janji::with('data_dokter','data_identitas','data_pasien','resep','kartu_berobat')->orderBy('created_at','DESC')->where('tanggal_janji',$date)->where('konfirmasi',0)
-        ->paginate(10);
+        $janji =  Janji::with('data_dokter','data_identitas','data_pasien','resep','kartu_berobat')->orderBy('created_at','DESC')->where('tanggal_janji',$date)->where('status','<',1)
+        ->paginate(10)->where('konfirmasi',0);
         return response()->json(['status' => 'success','data' => $janji],200);
 
     }
