@@ -210,7 +210,7 @@ class JanjiController extends Controller
             return response()->json($validate->errors(), 500);
         }
         
-        $queryAntrian = Janji::whereDate('created_at',Carbon::today())->where('id_dokter',$request->id_dokter)->where('status','!=','4')->orderBy('nomor_antrian','DESC');
+        $queryAntrian = Janji::whereDate('created_at',$request->tanggal_janji)->where('id_dokter',$request->id_dokter)->where('status','!=','4')->orderBy('nomor_antrian','DESC');
 
         $cekAntrian = $queryAntrian->first();
 
