@@ -121,11 +121,6 @@ class IdentitasController extends Controller
         // }
         
 
-        // $jenisPajak = JenisPajak::find($request->id);
-
-        // $jenisPajak->update([
-        //     'nama_pajak' => $request->nama_pajak
-        // ]);
 
 
         $identitas = Identitas::where('id_pasien',$request->user()->id);
@@ -143,7 +138,8 @@ class IdentitasController extends Controller
             'goldar' => $request->goldar,
             'riwayat_penyakit' => $request->riwayat_penyakit,
             'alergi_obat' => $request->alergi_obat,
-            'alergi_makanan' => $request->alergi_makanan
+            'alergi_makanan' => $request->alergi_makanan,
+            'ibu' => $request->ibu == undefined ? $identitas->first()->ibu : $request->ibu
         ]);
         return response()->json(['status' => 'success']);
 

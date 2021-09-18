@@ -32,7 +32,7 @@
         .tertanda{width:100%;margin-top:30px;}
         .tertanda .col{text-align:center;width:50%;float:right;height:150px;}
         .tertanda .col p{font-size:13px;margin:none;margin-block-start:0;margin-block-end:0;margin-top:10px;}
-        .data-info{margin-bottom:100px;}
+        /* .data-info{margin-bottom:100px;} */
         .data-info, .data-name{width:80%;}
         .jumlah-data td{padding:8px;font-size:10px;border-bottom-style:double !important;}
         .left-teks{text-align:left;}
@@ -60,9 +60,10 @@
             <img src="../public/img/logo.png" id="logo" alt="">
         </div>
         <div class="title-document">
-            <p>Easy Dent</p>
-            <p>{{$setting->rumah_sakit}}</p>
-            <p>{{$setting->alamat}}</p>
+            <p>DENTAL FAMILY CARE CLINIC</p>
+            <p>Klinik Perawatan Kesehatan Gigi</p>
+            <p>Jl. Kebahagian Blok B, No.4, BTP - Makassar</p>
+            <p>0812 4440 9161</p>
         </div>
     </div>
 
@@ -74,10 +75,10 @@
             <h1 class="sts"><b>Kwitansi</b></h1>
         </div>
         <table>
-            <tr>
+            <!-- <tr>
                 <td class="name-data"><b>Nomor Kartu</b> </td>
                 <td><span>:&nbsp;&nbsp;&nbsp;</span>{{$kartuBerobat->no_kartu}}</td>
-            </tr>
+            </tr> -->
             <tr>
                 <td class="name-data"><b>Tanggal </b> </td>
                 <td><span>:&nbsp;&nbsp;&nbsp;</span>{{ $tanggal }}</td>
@@ -127,10 +128,13 @@
             <div class="data-info" >
                 <p>Mengetahui,</p>
                 <p style="margin-top:0 !important; font-weight:bold"></p>
+                <img src="../public/img/tanda_tangan.png" style="height:150" alt="">
             </div>
-            <div class="data-name" style="margin-top:-40px">
+           
+            <div class="data-name">
                 <p style="margin-bottom:-5px !important;">{{$kartuBerobat->dokter->nama}}</p>
                 <hr style="width: 175px;">
+                <p style="margin-bottom:0px !important;">SIP : 446/22.1.14/Drg/DKK/II/2019</p>
                 <p style="margin-top:-5px !important "></p>
             </div>
         </div>
@@ -139,7 +143,7 @@
                 <!-- <p>&nbsp;</p>
                 <p style="margin-top:0 !important; font-weight:bold">aasd</p> -->
             </div>
-            <div class="data-name" style="margin-top:-40px">
+            <div class="data-name" >
                 <!-- <p style="margin-bottom:-5px !important;">asd</p>
                 <hr style="width: 175px;">
                 <p style="margin-top:-5px !important ">NIP 123</p> -->
